@@ -19,6 +19,38 @@ class Range(object):
             yield Range(self.low + incr * i, self.low + incr * (i + 1))
 
 
+class Rectangle(object):
+    """
+    A rectangular region.
+    """
+
+    def __init__(self, lows, highs):
+        self.ranges = tuple(
+            Range(l, h) for l, h in zip(lows, highs)
+        )
+
+    def __repr__(self):
+        rx, ry = self.ranges
+        return 'Rectangle({}, {})'.format(
+            (rx.low, ry.low), (rx.high, ry.high)
+        )
+
+    def __contains__(self, point):
+        return all(p in r for p, r in zip(point, self.ranges))
+
+    def split(self):
+        splitsx, splitsy = (
+            list(_range.split())
+            for _range in self.ranges
+        )
+        for sx in splitsx:
+            for sy in splitsy:
+                yield Rectangle(
+                    (sx.low, sy.low),
+                    (sx.high, sy.high),
+                )
+
+
 class Tree(object):
     """
     A realy simple space partitioning tree. That covers the volume
@@ -85,3 +117,5 @@ if __name__ == "__main__":
     assert tree.contains(3)
     assert not tree.contains(10)
     print('Everything working nicely')
+    other = Tree(Rectangle((0, 0), (8, 8)), max_depth=2)
+    other.print_to_screen()
